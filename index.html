@@ -2,6 +2,7 @@
 <title>Generator Sertifikat J-Expert</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{--bg:#fff;--pn:#f6f8fc;--tx:#1f2937;--mu:#64748b;--ac:#1b4b8a;--ac2:#c8453f;--bd:#dbe2ec}
@@ -28,6 +29,7 @@ button{cursor:pointer;background:var(--ac);color:#fff;border:0;padding:7px 10px;
 <div class="tabs"><button onclick="document.body.classList.add('v1')">1 · Isi Data</button><button onclick="document.body.classList.remove('v1');fit()">2 · Preview & Edit</button></div>
 <div class="main"><div id="L">
 <details class="card"><summary>Cara pakai (5 langkah)</summary><ol class="hint" style="padding-left:18px;margin:0"><li>Tempel pesan mentah (nama + baris “Tanggal …”), klik Proses.</li><li>Isi bidang, kualifikasi, masa berlaku (sekali untuk semua atau per nama).</li><li>Isi penanggung jawab, daftar unit kompetensi, upload tanda tangan.</li><li>Cek & rapikan di Preview: geser, ubah ukuran, rotasi, warna, font.</li><li>Klik ⬇ PDF (satu orang) atau ⬇ ZIP (semua) di toolbar preview.</li></ol></details>
+<details class="card"><summary>Impor dari Excel / CSV</summary><p class="hint">Upload .xlsx, .xls, atau .csv (sheet pertama). Baris pertama = judul kolom. Dikenali: nama, nomor sertifikat, no reg., bidang, kompetensi/kualifikasi, masa berlaku, tanggal, penanggung jawab. Tambahkan “EN” di judul untuk versi Inggris (mis. “kompetensi EN”). Kolom pertama tanpa judul dianggap nama. Semua peserta langsung masuk ke preview.</p><input type="file" id="xf" accept=".xlsx,.xls,.csv" onchange="xlsFile(this)"><button class="g" onclick="xlsSample()">Unduh contoh format</button><p class="hint" id="xm"></p></details>
 <details class="card"><summary>1 · Pesan mentah</summary><p class="hint">Satu nama per baris, lalu “Tanggal 18 November 2026”.</p><textarea id="raw">Gilang Wibisono Putro
 Gyokanne
 Arif Surahman
@@ -84,8 +86,8 @@ const pad=(n,l)=>String(n).padStart(l,'0'),rnd=(a,b)=>a+Math.floor(Math.random()
 const pf=(p,k)=>S.same?S.com[k]:p[k];
 function code(s){const w=s.toUpperCase().split(/\s+/).filter(x=>x&&x!='DAN'&&x!='&');return w.length==1?w[0].slice(0,3):w.map(x=>x[0]).join('').slice(0,4)}
 function nums(r){const y=new Date().getFullYear(),g={};
-S.people.forEach(p=>{if(r||!p.mid)p.mid=pad(rnd(1,99999),5);p.nomor=`${S.prefix} ${p.mid} ${y}`;const k=pf(p,'bI')+'|'+pf(p,'kI');(g[k]=g[k]||[]).push(p)});
-for(const k in g)g[k].forEach((p,i)=>{p.reg=`${code(pf(p,'bI'))}-${code(pf(p,'kI'))}-${S.prefix}-${y}-${pad((+g[k][0].mid%9000)+i+1,4)}`})}
+S.people.forEach(p=>{if(r)p.fixN=p.fixR=0;if(r||!p.mid)p.mid=pad(rnd(1,99999),5);if(!p.fixN)p.nomor=`${S.prefix} ${p.mid} ${y}`;const k=pf(p,'bI')+'|'+pf(p,'kI');(g[k]=g[k]||[]).push(p)});
+for(const k in g)g[k].forEach((p,i)=>{if(!p.fixR)p.reg=`${code(pf(p,'bI'))}-${code(pf(p,'kI'))}-${S.prefix}-${y}-${pad((+g[k][0].mid%9000)+i+1,4)}`})}
 function parse(){const L=$('#raw').value.split('\n').map(x=>x.trim()).filter(Boolean),n=[];S.date=S.date;
 L.forEach(l=>{const m=l.match(/^tanggal\s*[:\-]?\s*(.+)/i);m?S.date=m[1]:n.push(l)});
 S.people=n.map(x=>({n:x,...S.com}));S.cur=0;nums(1);ui()}
@@ -94,7 +96,7 @@ const f=(o,i)=>K.map(([k,l])=>`<label class="hint">${l}<input value="${esc(o[k])
 $('#com').innerHTML=S.same?`<div class="row">${f(S.com,'c')}</div><button class="g" onclick="trAll('c')">🌐 Terjemahkan ke Inggris</button><button class="g" style="color:var(--ac2)" onclick="clrEn('c')">⌫ Kosongkan Inggris</button>`:'';
 $('#ppl').innerHTML=S.people.map((p,i)=>`<div class="p"><b>${i+1}.</b> <input value="${esc(p.n)}" data-k="n" data-i="${i}"><div class="row"><input value="${esc(p.nomor)}" data-k="nomor" data-i="${i}"><input value="${esc(p.reg)}" data-k="reg" data-i="${i}"></div>${S.same?'':'<div class="row">'+f(p,i)+'</div><button class="g" onclick="trAll('+i+')">🌐 Terjemahkan ke Inggris</button><button class="g" style="color:var(--ac2)" onclick="clrEn('+i+')">⌫ Kosongkan Inggris</button>'}</div>`).join('');
 rows();$('#cp').innerHTML=S.people.map((p,i)=>`<option value="${i}">${esc(p.n)}</option>`).join('');$('#cp').value=S.cur;
-document.querySelectorAll('#L [data-k]').forEach(e=>e.oninput=()=>{const{k,i}=e.dataset;if(i=='c'){S.com[k]=e.value}else{S.people[i][k]=e.value}
+document.querySelectorAll('#L [data-k]').forEach(e=>e.oninput=()=>{const{k,i}=e.dataset;if(i=='c'){S.com[k]=e.value}else{S.people[i][k]=e.value;if(k=='nomor')S.people[i].fixN=1;if(k=='reg')S.people[i].fixR=1}
 if(['bI','kI'].includes(k)){nums(0);if(i=='c'||1){document.querySelectorAll('#ppl [data-k=reg]').forEach((x,j)=>x.value=S.people[j].reg)}}
 if(k=='n')$('#cp').options[i].text=e.value;if(S.auto&&MAP[k])sched(k+i,()=>trField(i,k));rr()});rr()}
 function rows(){
@@ -130,14 +132,34 @@ const fin=ok=>{n.onblur=n.onkeydown=null;n.contentEditable='false';const v=n.tex
 n.onblur=()=>fin(1);n.onkeydown=e=>{if(e.key=='Enter'&&!e.shiftKey){e.preventDefault();n.blur()}else if(e.key=='Escape'){e.preventDefault();n.onblur=null;fin(0)}}}
 function startEdit(id){const e=S.els.find(x=>x.id==id),n=document.querySelector(`#pg .el[data-id="${id}"]`);if(!e||!n||e.k)return;n.querySelectorAll('.hd').forEach(x=>x.remove());edTxt(n,v=>setText(e,v),n.textContent)}
 function setText(e,v){const m=e.t.match(/^\{(\w+)\}$/);if(!m){e.t=v;rr();return}const k=m[1],p=S.people[S.cur];
-if(k=='nama'||k=='NAMA')p.n=v;else if(k=='nomor'||k=='reg')p[k]=v;else if(k=='tgl')S.date=v;else if(k=='pj'){S.pj=v;$('#pj').value=v}
+if(k=='nama'||k=='NAMA')p.n=v;else if(k=='nomor'||k=='reg'){p[k]=v;p[k=='nomor'?'fixN':'fixR']=1}else if(k=='tgl'){if(p.tgl)p.tgl=v;else S.date=v}else if(k=='pj'){S.pj=v;$('#pj').value=v}
 else{(S.same?S.com:p)[k]=v;if(k=='bI'||k=='kI')nums(0);if(S.auto&&MAP[k]){const c=S.same?'c':S.cur;sched(k+c,()=>trField(c,k))}}ui()}
 function tblEdit(ev){const n=ev.currentTarget,t=document.elementFromPoint(ev.clientX,ev.clientY);if(!t||!n.contains(t))return;const td=t.closest('td');if(!td)return;
 if(td.dataset.h!==undefined){const j=+td.dataset.h;edTxt(td,v=>{S.cols[j].h=v;rows();rr()},td.textContent);return}
 const i=+td.dataset.r,j=+td.dataset.j;let x=t.closest('[data-l]')||td;if(S.cols[j].en&&!x.dataset.l)x=td.querySelector('b');if(!x)return;const l=x.dataset.l;
 edTxt(x,v=>{const r=S.rows[i],a=String(r[j]??'').split('\n');if(l===undefined)r[j]=v;else{a[l]=v;r[j]=a[0]+'\n'+(a[1]||'')}if(S.auto&&l==='0')sched('r'+i+'_'+j,()=>trCell(i,j));rows();rr()},x.textContent)}
+const FM=[['reg',/reg/],['pj',/penanggung|\bpj\b/],['tgl',/tanggal|tgl|date|lulus/],['bI',/bidang|field/],['kI',/kompeten|kualifikasi|qualif|jabatan/],['mI',/masa|berlaku|valid/],['nomor',/nomor\s*sert|no\.?\s*sert|certificate|^\s*nomor\s*$|^\s*no\.?\s*$/],['n',/nama|name/]];
+const LB={n:'nama',nomor:'nomor',reg:'no reg',bI:'bidang',kI:'kompetensi',mI:'masa berlaku',tgl:'tanggal',pj:'penanggung jawab',bE:'bidang EN',kE:'kompetensi EN',mE:'masa berlaku EN'};
+async function xlsFile(i){const f=i.files[0];if(!f)return;const m=$('#xm');try{if(!window.XLSX)throw new Error('library Excel belum termuat (cek internet)');m.textContent='Membaca…';
+const wb=/\.csv$/i.test(f.name)?XLSX.read(await f.text(),{type:'string'}):XLSX.read(await f.arrayBuffer(),{type:'array'}),sn=wb.SheetNames[0];
+await xlsImport(XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:false,defval:''}),sn)}catch(e){m.textContent='Gagal membaca file: '+e.message}i.value=''}
+async function xlsImport(rows,sn){const m=$('#xm');rows=rows.filter(r=>r.some(c=>String(c).trim()));const col={};
+(rows[0]||[]).forEach((c,j)=>{const t=String(c).trim().toLowerCase();if(!t)return;const en=/\b(en|inggris|english)\b/.test(t);for(const[k,re]of FM)if(re.test(t)){const key=en&&MAP[k]?MAP[k]:k;if(col[key]==null)col[key]=j;break}});
+let st=1;if(!Object.keys(col).length){col.n=0;st=0}else if(col.n==null){const u=Object.values(col);if(u.includes(0)){m.textContent='Kolom nama tidak ditemukan. Beri judul “nama” pada kolom nama.';return}col.n=0}
+const g=(r,k)=>col[k]==null?'':String(r[col[k]]??'').trim(),all=rows.slice(st).map(r=>({n:g(r,'n'),nomor:g(r,'nomor'),reg:g(r,'reg').replace(/^\s*no\.?\s*reg\.?\s*:?\s*/i,''),bI:g(r,'bI'),kI:g(r,'kI'),mI:g(r,'mI'),bE:g(r,'bE'),kE:g(r,'kE'),mE:g(r,'mE'),tgl:g(r,'tgl').replace(/^[^,\d]*,\s*/,''),pj:g(r,'pj')})),L=all.filter(x=>x.n);
+if(!L.length){m.textContent='Tidak ada baris peserta yang terbaca.';return}const has=k=>col[k]!=null,warn=[];
+S.date=L.find(x=>x.tgl)?.tgl||S.date;const pj=L.find(x=>x.pj)?.pj;if(pj){S.pj=pj;$('#pj').value=pj}
+S.people=L.map(x=>{const p={n:x.n,...S.com};['bI','kI','mI','bE','kE','mE'].forEach(k=>{if(has(k))p[k]=(k=='bI'||k=='kI')?x[k].toUpperCase():x[k]});for(const k in MAP)if(has(k)&&!has(MAP[k]))p[MAP[k]]='';
+if(x.nomor){p.nomor=x.nomor;p.fixN=1}if(x.reg){p.reg=x.reg;p.fixR=1}if(x.tgl&&x.tgl!==S.date)p.tgl=x.tgl;return p});
+const F=['bI','kI','mI','bE','kE','mE'];S.same=F.every(k=>S.people.every(p=>p[k]===S.people[0][k]))?1:0;if(S.same)F.forEach(k=>S.com[k]=S.people[0][k]);
+S.cur=0;$('#same').checked=!!S.same;$('#raw').value=S.people.map(p=>p.n).join('\n')+'\n\nTanggal '+S.date;nums(0);ui();
+if(!has('bI'))warn.push('kolom bidang tidak ada → memakai bidang yang sudah diisi');if(new Set(L.map(x=>x.tgl)).size>1)warn.push('tanggal berbeda-beda → dipakai per peserta');if(all.length>L.length)warn.push((all.length-L.length)+' baris tanpa nama dilewati');
+const need=[...Object.keys(MAP)].filter(k=>has(k)&&!has(MAP[k]));
+m.textContent=`✓ ${L.length} peserta dari “${sn}”. Kolom: ${Object.entries(col).map(([k,j])=>LB[k]+'='+XLSX.utils.encode_col(j)).join(', ')}.${warn.length?' ⚠ '+warn.join('; ')+'.':''}${need.length?(S.auto?' Menerjemahkan Inggris…':' Isi Inggris manual atau aktifkan terjemah otomatis.'):''}`;
+if(S.auto&&need.length){for(const i of(S.same?['c']:S.people.map((p,i)=>i)))for(const k of need)await trField(i,k);m.textContent=m.textContent.replace(' Menerjemahkan Inggris…',' Terjemahan Inggris selesai.')}}
+function xlsSample(){if(!window.XLSX)return;const ws=XLSX.utils.aoa_to_sheet([['nama','nomor sertifikat','no reg.','bidang','kompetensi','masa berlaku','tanggal'],['Nama Peserta 1','1003 1101 2026','No. Reg.: JX-INS-1101 2026','Pendidikan dan Pelatihan','Instruktur','1 Tahun','Bekasi, 18 November 2026']]),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Sheet1');XLSX.writeFile(wb,'contoh-data-sertifikat.xlsx')}
 function sig(n,i){const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{S.sig[n]=r.result;rr()};r.readAsDataURL(f)}
-function vals(p){const g=k=>pf(p,k);return{nama:p.n,NAMA:p.n.toUpperCase(),nomor:p.nomor,reg:p.reg,bI:g('bI'),bE:g('bE'),kI:g('kI'),kE:g('kE'),mI:g('mI'),mE:g('mE'),tgl:S.date,pj:S.pj}}
+function vals(p){const g=k=>pf(p,k);return{nama:p.n,NAMA:p.n.toUpperCase(),nomor:p.nomor,reg:p.reg,bI:g('bI'),bE:g('bE'),kI:g('kI'),kE:g('kE'),mI:g('mI'),mE:g('mE'),tgl:p.tgl||S.date,pj:S.pj}}
 function build(pg,p,ed){const d=document.createElement('div');d.style.cssText='position:relative;width:1414px;height:2000px;overflow:hidden';if(ed)d.className='ed';
 d.innerHTML=`<img src="${pg==1?T1:T2}" style="position:absolute;left:0;top:0;width:1414px;height:2000px">`;const v=p?vals(p):{};
 S.els.filter(e=>e.pg==pg).forEach(e=>{const n=document.createElement('div');n.className='el'+(ed&&S.sel==e.id?' sel':'');n.dataset.id=e.id;
