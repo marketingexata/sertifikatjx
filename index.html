@@ -31,10 +31,10 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offse
 .view{position:absolute;inset:0;opacity:0;visibility:hidden;transform:translateY(14px) scale(.985);transition:opacity .4s,transform .45s cubic-bezier(.2,.9,.3,1),visibility 0s .4s}
 .view.on{opacity:1;visibility:visible;transform:none;transition:opacity .4s,transform .45s cubic-bezier(.2,.9,.3,1)}
 #home{overflow:auto;padding:4px 4px 20px}
-.hero{max-width:1000px;margin:3vh auto 22px;padding:34px 38px}
+.hero{max-width:1180px;margin:3vh auto 22px;padding:34px 38px}
 .hero h1{margin:0 0 8px;font-size:clamp(26px,4vw,40px);line-height:1.12;letter-spacing:-.5px;background:linear-gradient(120deg,var(--navy),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{margin:0;color:var(--mute);font-size:15px;max-width:620px}
-.grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
 .tool{position:relative;padding:28px;cursor:pointer;overflow:hidden;text-align:left;font:inherit;color:inherit;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .2s ease-out,box-shadow .3s}
 .tool.rest{transition:transform .6s cubic-bezier(.2,1.2,.3,1),box-shadow .3s}
 .tool::after{content:"";position:absolute;inset:0;background:radial-gradient(320px circle at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.95),transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
@@ -50,7 +50,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offse
 .go{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;color:#fff;font-weight:600;background:linear-gradient(135deg,var(--sky),var(--blue));box-shadow:0 6px 18px rgba(47,127,224,.38)}
 .go svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.2;transition:transform .3s}
 .tool:hover .go svg{transform:translateX(5px)}
-.foot{max-width:1000px;margin:20px auto 0;color:var(--mute);font-size:12px;text-align:center}
+.foot{max-width:1180px;margin:20px auto 0;color:var(--mute);font-size:12px;text-align:center}
 .panel{padding:6px;overflow:hidden}
 .panel iframe{width:100%;height:100%;border:0;border-radius:18px;background:transparent;opacity:0;transition:opacity .5s}
 .panel.ready iframe{opacity:1}
@@ -73,13 +73,14 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offse
     <button data-go="home" class="on">Home</button>
     <button data-go="cert">Sertifikat</button>
     <button data-go="stamp">Stamper</button>
+    <button data-go="blur">Blur Teks</button>
   </nav>
 </header>
 <div class="stage">
   <section class="view on" id="home" aria-label="Home">
     <div class="hero glass ent" style="--i:0">
       <h1>Perangkat kerja J-Expert Recruitment</h1>
-      <p>Buat sertifikat untuk banyak peserta sekaligus, dan bubuhkan stempel Sold Out pada daftar kandidat. Pilih alat di bawah untuk mulai.</p>
+      <p>Buat sertifikat untuk banyak peserta sekaligus, bubuhkan stempel Sold Out pada daftar kandidat, dan blur bagian PDF yang sensitif. Pilih alat di bawah untuk mulai.</p>
     </div>
     <div class="grid">
       <button class="tool glass ent" style="--i:1" data-go="cert">
@@ -96,11 +97,19 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offse
         <div class="tags"><span>Deteksi baris otomatis</span><span>Warna &amp; gambar sendiri</span></div>
         <span class="go">Buka Stamper <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
       </button>
+    <button class="tool glass ent" style="--i:3" data-go="blur">
+        <div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3s6 6.500 6 11a6 6 0 0 1-12 0c0-4.500 6-11 6-11Z"/><path d="M9 15a3 3 0 0 0 3 3"/></svg></div>
+        <h2>Blur Teks</h2>
+        <p>Impor PDF, seleksi area dengan kotak putus-putus, lalu blur teks atau gambar di dalamnya. Atur kekuatan blur dan feather tepinya.</p>
+        <div class="tags"><span>Seleksi bebas</span><span>Feather tepi</span><span>Simpan PDF</span></div>
+        <span class="go">Buka Blur <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+      </button>
     </div>
     <p class="foot">Dibutuhkan koneksi internet saat membuka alat, untuk memuat pustaka PDF. Pengaturan di tiap alat tetap tersimpan di browser ini.</p>
   </section>
   <section class="view glass panel" id="cert" aria-label="Generator Sertifikat"></section>
   <section class="view glass panel" id="stamp" aria-label="Stempel Sold Out"></section>
+  <section class="view glass panel" id="blur" aria-label="Blur Teks"></section>
 </div>
 
 <script type="text/plain" id="src-cert"><!DOCTYPE html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -713,10 +722,297 @@ drawSwatches();ST=buildStamp();renderStamps();
 </body>
 </html>
 </script>
+<script type="text/plain" id="src-blur"><!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>J-Expert · Blur Teks</title>
+<style>
+:root{--navy:#17304F;--red:#B8412F;--sky:#62B8F7;--blue:#2F7FE0;--mute:#5F7794;--edge:rgba(255,255,255,.9);--line:#CFE3F8;--ink:var(--navy)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font:14px/1.45 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:var(--navy);background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;background:linear-gradient(150deg,#fff 0%,#EEF7FF 55%,#fff 100%)}
+.bg i{position:absolute;border-radius:50%;filter:blur(80px);animation:float 22s ease-in-out infinite alternate}
+.bg i:nth-child(1){width:46vw;height:46vw;background:#B5DCFF;left:-10vw;top:-14vw;opacity:.8}
+.bg i:nth-child(2){width:38vw;height:38vw;background:#CBE6FF;right:-8vw;bottom:-12vw;animation-duration:28s;opacity:.85}
+.bg i:nth-child(3){width:24vw;height:24vw;background:#DDEFFF;right:28vw;top:-6vw;animation-duration:34s}
+@keyframes float{to{transform:translate(6vw,5vw) scale(1.15)}}
+@media(prefers-reduced-motion:reduce){.bg i{animation:none}*{transition:none!important;animation:none!important}}
+.glass{background:rgba(255,255,255,.55);border:1px solid var(--edge);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);box-shadow:0 10px 34px rgba(47,127,224,.14),inset 0 1px 0 #fff;border-radius:20px}
+header{margin:14px 14px 0;padding:10px 20px;display:flex;align-items:center;gap:16px}
+.logo{font:800 25px/1 "Arial Black",Impact,sans-serif;letter-spacing:1px;color:var(--navy)}
+.logo i{color:var(--red);font-style:normal}
+.logo small{display:block;font:600 9px/1 Arial,sans-serif;letter-spacing:5px;margin-top:3px;color:var(--mute)}
+header h1{font-size:14px;margin:0;font-weight:500;color:var(--mute)}
+.zoom{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--mute);font-size:12px}
+main{flex:1;display:flex;min-height:0;gap:14px;padding:14px}
+aside{width:322px;flex:none;overflow:auto;display:flex;flex-direction:column;gap:12px;padding:2px}
+aside::-webkit-scrollbar,#view::-webkit-scrollbar{width:8px}
+aside::-webkit-scrollbar-thumb,#view::-webkit-scrollbar-thumb{background:rgba(47,127,224,.28);border-radius:9px}
+.card{padding:14px 16px;transition:box-shadow .25s,transform .25s}
+.card:hover{box-shadow:0 14px 38px rgba(47,127,224,.22),inset 0 1px 0 #fff}
+.card h2{font-size:13px;margin:0 0 10px;font-weight:700;display:flex;align-items:center;gap:8px}
+.card h2 b{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--blue));color:#fff;font-size:11px}
+.btn{display:block;width:100%;border:1px solid var(--line);background:rgba(255,255,255,.75);color:var(--navy);border-radius:12px;padding:9px 12px;font:600 13px inherit;cursor:pointer;transition:transform .15s,background .2s,box-shadow .2s}
+.btn:hover:not(:disabled){background:#fff;transform:translateY(-1px);box-shadow:0 6px 16px rgba(47,127,224,.18)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.pri{background:linear-gradient(135deg,var(--sky),var(--blue));color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(47,127,224,.35)}
+.btn.pri:hover:not(:disabled){background:linear-gradient(135deg,#74C2FA,#3A8AEC);box-shadow:0 10px 24px rgba(47,127,224,.45)}
+.btn.sm{padding:6px 11px;font-size:12px;width:auto}
+.btn:focus-visible,input:focus-visible,.sw button:focus-visible,.chip:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+input[type=text]{width:100%;padding:9px 12px;margin-bottom:8px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.85);color:var(--navy);font:inherit}
+input[type=text]::placeholder{color:#8FA5BF}
+input[type=checkbox],input[type=range]{accent-color:var(--blue)}
+input[type=range]{width:100%;height:4px}
+.row{display:flex;gap:8px}
+label.r{display:grid;grid-template-columns:62px 1fr 44px;align-items:center;gap:6px;font-size:12px;margin-bottom:8px}
+label.r output{text-align:right;color:var(--mute);font-variant-numeric:tabular-nums}
+label.c{display:flex;gap:8px;align-items:center;font-size:12px;margin-top:8px;color:var(--mute)}
+.hint{font-size:12px;color:var(--mute);margin:8px 0 0}
+.sw{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sw button{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line),0 2px 6px rgba(23,48,79,.2);cursor:pointer;transition:transform .15s}
+.sw button:hover{transform:scale(1.18)}
+.sw button.on{box-shadow:0 0 0 3px var(--blue)}
+.sw input[type=color]{width:34px;height:30px;border:0;padding:0;background:none;border-radius:8px;cursor:pointer}
+#thumb{display:none;align-items:center;gap:10px;margin-top:10px;padding:8px;border-radius:12px;background:rgba(255,255,255,.7);border:1px solid var(--line)}
+#thumb img{height:36px;max-width:90px;object-fit:contain;background:repeating-conic-gradient(#E3EEFA 0 25%,#fff 0 50%) 0/10px 10px;border-radius:6px}
+#list{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.8);color:var(--navy);border-radius:99px;padding:3px 11px;font-size:12px;cursor:pointer;transition:all .2s}
+.chip:hover{border-color:var(--sky)}
+.chip.on{background:linear-gradient(135deg,var(--sky),var(--blue));border-color:transparent;color:#fff}
+#view{flex:1;overflow:auto;border-radius:22px;padding:22px;position:relative}
+#empty{max-width:520px;margin:9vh auto 0;padding:54px 28px;text-align:center;cursor:pointer;border:2px dashed #9CCBF5;transition:transform .25s,border-color .25s,background .25s}
+#empty:hover,#empty.drag{transform:translateY(-4px);border-color:var(--blue);background:rgba(255,255,255,.85)}
+#empty svg{width:54px;height:54px;stroke:var(--blue);margin-bottom:10px}
+#empty b{display:block;font-size:19px;margin-bottom:4px}
+#empty span{color:var(--mute)}
+.page{position:relative;margin:0 auto 22px;border-radius:6px;box-shadow:0 14px 40px rgba(47,127,224,.25);background:#fff;user-select:none;touch-action:none}
+.page canvas{display:block;width:100%;height:auto;border-radius:6px}
+.pno{position:absolute;top:10px;left:-10px;background:rgba(23,48,79,.78);backdrop-filter:blur(10px);color:#fff;font-size:11px;padding:3px 12px;border-radius:0 99px 99px 0;z-index:2}
+.ov{position:absolute;inset:0}
+.st{position:absolute;cursor:move}
+.st img{width:100%;display:block;pointer-events:none}
+.st.new img{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(1.7);opacity:0}}
+.st.sel{outline:2px dashed var(--blue);outline-offset:4px;border-radius:4px}
+.hs,.hr{position:absolute;width:16px;height:16px;border-radius:50%;background:var(--blue);border:2px solid #fff;display:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hs{right:-10px;bottom:-10px;cursor:nwse-resize}
+.hr{left:calc(50% - 8px);top:-32px;cursor:grab}
+.st.sel .hs,.st.sel .hr{display:block}
+#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,30px);opacity:0;pointer-events:none;padding:11px 20px;font-size:13px;transition:.3s;z-index:9;max-width:90vw;background:rgba(255,255,255,.85)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast.err{border-color:var(--red);color:var(--red)}
+@media(max-width:820px){main{flex-direction:column}aside{width:100%;max-height:46vh}header h1{display:none}}
+</style><style>
+.ov{cursor:crosshair}
+.rg{position:absolute;border:2px dashed #2F7FE0;box-shadow:0 0 0 1px rgba(255,255,255,.95);cursor:move;touch-action:none}
+.rg.sel{border-color:#17304F;box-shadow:0 0 0 1px #fff,0 0 0 4px rgba(47,127,224,.25)}
+.rg i{position:absolute;width:12px;height:12px;background:#fff;border:2px solid #2F7FE0;border-radius:3px;display:none}
+.rg.sel i{display:block}
+.rg i[data-h=nw]{left:-8px;top:-8px;cursor:nwse-resize}.rg i[data-h=se]{right:-8px;bottom:-8px;cursor:nwse-resize}
+.rg i[data-h=ne]{right:-8px;top:-8px;cursor:nesw-resize}.rg i[data-h=sw]{left:-8px;bottom:-8px;cursor:nesw-resize}
+.rg i[data-h=n]{left:calc(50% - 6px);top:-8px;cursor:ns-resize}.rg i[data-h=s]{left:calc(50% - 6px);bottom:-8px;cursor:ns-resize}
+.rg i[data-h=e]{right:-8px;top:calc(50% - 6px);cursor:ew-resize}.rg i[data-h=w]{left:-8px;top:calc(50% - 6px);cursor:ew-resize}
+.rg.new{animation:rgin .3s ease-out}@keyframes rgin{from{opacity:0;transform:scale(.96)}}
+</style>
+<style id="jx-theme">.bg{display:none}body{background:transparent}header .logo,header h1{display:none}.zoom{margin-left:0}</style></head>
+<body>
+<div class="bg"><i></i><i></i><i></i></div>
+<header class="glass">
+  <div class="logo">J<i>-</i>EXPERT<small>RECRUITMENT</small></div>
+  <h1>Blur Teks</h1>
+  <div class="zoom">Zoom <button class="btn sm" id="zo" aria-label="Perkecil">−</button><button class="btn sm" id="zi" aria-label="Perbesar">+</button></div>
+</header>
+<main>
+<aside>
+  <section class="card glass">
+    <h2><b>1</b>Impor PDF</h2>
+    <input type="file" id="file" accept="application/pdf" hidden>
+    <button class="btn" id="pick">Pilih file PDF</button>
+    <p class="hint" id="fname">Belum ada file. Anda juga bisa menyeret PDF ke area pratinjau.</p>
+  </section>
+  <section class="card glass">
+    <h2><b>2</b>Area blur</h2>
+    <p class="hint" style="margin:0 0 12px">Tahan klik kiri lalu seret di halaman untuk membuat kotak seleksi. Seret titik putih untuk mengubah ukuran ke segala arah, seret isi kotak untuk memindah.</p>
+    <label class="r">Kekuatan <input type="range" id="str" min="1" max="100" value="40"><output></output></label>
+    <label class="r">Feather <input type="range" id="fea" min="0" max="30" value="8"><output></output></label>
+    <div class="row">
+      <button class="btn sm" id="all" style="flex:1">Terapkan ke semua</button>
+      <button class="btn sm" id="del">Hapus area</button>
+    </div>
+    <button class="btn sm" id="clr" style="margin-top:8px;width:100%">Hapus semua area</button>
+  </section>
+  <section class="card glass">
+    <h2>Area di dokumen <span class="chip" id="cnt" style="cursor:default">0</span></h2>
+    <div id="list"></div>
+  </section>
+  <section class="card glass">
+    <h2><b>3</b>Simpan</h2>
+    <button class="btn pri" id="save" disabled>Simpan PDF blur</button>
+    <p class="hint">Halaman yang punya area blur diubah menjadi gambar, sehingga teks di bawah blur benar-benar hilang. Halaman lain tidak diubah.</p>
+  </section>
+</aside>
+<div id="view" class="glass">
+  <div id="empty" class="glass">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+    <b>Seret PDF ke sini</b><span>atau klik untuk memilih file</span>
+  </div>
+</div>
+</main>
+<div id="toast" class="glass" role="status"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"><\/script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"><\/script>
+<script>
+const $=id=>document.getElementById(id);
+const PS=2,EXPS=2.5,HAS_F='filter' in CanvasRenderingContext2D.prototype;
+let bytes=null,fileName='',pdf=null,pages=[],rs=[],sel=null,uid=0,zoomW=900,D={str:40,fea:8},drag=null,raf=0;const queue=new Set();
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const mk=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+const clamp=v=>Math.min(1,Math.max(0,v));
+
+/* ---------- Mesin blur (dipakai pratinjau dan ekspor) ---------- */
+function softDraw(dst,src,sx,sy,w,h,rad){
+  if(HAS_F){dst.filter=`blur(${rad}px)`;dst.drawImage(src,sx,sy,w,h,0,0,w,h);dst.filter='none';return}
+  const d=Math.max(1,rad*1.1),s=mk(Math.max(1,Math.round(w/d)),Math.max(1,Math.round(h/d))),g=s.getContext('2d');
+  g.imageSmoothingQuality='high';g.drawImage(src,sx,sy,w,h,0,0,s.width,s.height);
+  dst.imageSmoothingQuality='high';dst.drawImage(s,0,0,s.width,s.height,0,0,w,h);
+}
+function applyBlur(c,list,k){
+  const g=c.getContext('2d');
+  list.forEach(r=>{
+    const rad=Math.max(.5,r.str*.3*k),f=r.fea*k,x=Math.min(r.x0,r.x1)*c.width,y=Math.min(r.y0,r.y1)*c.height,
+      w=Math.abs(r.x1-r.x0)*c.width,h=Math.abs(r.y1-r.y0)*c.height;
+    if(w<2||h<2)return;
+    const pad=Math.ceil(rad*3+f+4),sx=Math.max(0,Math.floor(x-pad)),sy=Math.max(0,Math.floor(y-pad)),
+      cw=Math.min(c.width,Math.ceil(x+w+pad))-sx,ch=Math.min(c.height,Math.ceil(y+h+pad))-sy;
+    const t=mk(cw,ch),tg=t.getContext('2d');
+    tg.fillStyle='#fff';tg.fillRect(0,0,cw,ch);softDraw(tg,c,sx,sy,cw,ch,rad);
+    const m0=mk(cw,ch),m0g=m0.getContext('2d');m0g.fillStyle='#000';
+    if(f>1){m0g.fillRect(x-sx+f/2,y-sy+f/2,Math.max(1,w-f),Math.max(1,h-f));
+      const m=mk(cw,ch);softDraw(m.getContext('2d'),m0,0,0,cw,ch,f/2);tg.globalCompositeOperation='destination-in';tg.drawImage(m,0,0)}
+    else{tg.globalCompositeOperation='destination-in';m0g.fillRect(x-sx,y-sy,w,h);tg.drawImage(m0,0,0)}
+    g.drawImage(t,sx,sy);
+  });
+}
+function redraw(i){const p=pages[i],g=p.disp.getContext('2d');g.drawImage(p.base,0,0);applyBlur(p.disp,rs.filter(r=>r.page===i),PS)}
+function schedule(i){queue.add(i);if(!raf)raf=requestAnimationFrame(()=>{raf=0;queue.forEach(redraw);queue.clear()})}
+
+/* ---------- Muat PDF ---------- */
+async function loadPDF(file){
+  if(!file||file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name))return toast('File harus berformat PDF.',1);
+  bytes=new Uint8Array(await file.arrayBuffer());fileName=file.name.replace(/\.pdf$/i,'');$('fname').textContent=file.name;
+  pdf=await pdfjsLib.getDocument({data:bytes.slice()}).promise;
+  const view=$('view');view.innerHTML='';pages=[];rs=[];sel=null;
+  for(let i=1;i<=pdf.numPages;i++){
+    const p=await pdf.getPage(i),vp=p.getViewport({scale:PS}),base=mk(Math.round(vp.width),Math.round(vp.height));
+    await p.render({canvasContext:base.getContext('2d'),viewport:vp}).promise;
+    const disp=mk(base.width,base.height);disp.getContext('2d').drawImage(base,0,0);
+    const div=document.createElement('div');div.className='page';
+    const ov=document.createElement('div');ov.className='ov';
+    div.append(disp,ov);div.insertAdjacentHTML('beforeend','<span class="pno">Hal. '+i+'</span>');view.append(div);
+    pages.push({div,ov,base,disp});
+  }
+  setZoom(zoomW);$('save').disabled=false;renderRegions();toast(`PDF dimuat: ${pdf.numPages} halaman.`);
+}
+function setZoom(w){zoomW=Math.max(400,Math.min(1800,w));pages.forEach(p=>p.div.style.width=zoomW+'px')}
+
+/* ---------- Area blur ---------- */
+const cur=()=>rs.find(r=>r.id===sel);
+function styleEl(el,r){const x=Math.min(r.x0,r.x1),y=Math.min(r.y0,r.y1);
+  el.style.cssText=`left:${x*100}%;top:${y*100}%;width:${Math.abs(r.x1-r.x0)*100}%;height:${Math.abs(r.y1-r.y0)*100}%`}
+function renderRegions(fresh){
+  pages.forEach(p=>p.ov.innerHTML='');
+  rs.forEach(r=>{const el=document.createElement('div');el.className='rg'+(r.id===sel?' sel':'')+(r.id===fresh?' new':'');el.dataset.id=r.id;
+    el.innerHTML=['nw','n','ne','e','se','s','sw','w'].map(h=>`<i data-h="${h}"></i>`).join('');
+    pages[r.page].ov.append(el);styleEl(el,r)});
+  $('cnt').textContent=rs.length;
+  const L=$('list');L.innerHTML=rs.length?'':'<span class="hint" style="margin:0">Belum ada area.</span>';
+  rs.forEach((r,n)=>{const b=document.createElement('button');b.className='chip'+(r.id===sel?' on':'');b.textContent=`Hal. ${r.page+1} · #${n+1}`;
+    b.onclick=()=>{select(r.id);pages[r.page].div.scrollIntoView({block:'center',behavior:'smooth'})};L.append(b)});
+  syncSliders();
+}
+function select(id){sel=id;renderRegions()}
+function syncSliders(){const r=cur(),s=r?r.str:D.str,f=r?r.fea:D.fea;$('str').value=s;$('fea').value=f;
+  $('str').nextElementSibling.textContent=s;$('fea').nextElementSibling.textContent=f+' pt'}
+$('str').oninput=()=>{D.str=+$('str').value;const r=cur();if(r){r.str=D.str;schedule(r.page)}syncSliders()};
+$('fea').oninput=()=>{D.fea=+$('fea').value;const r=cur();if(r){r.fea=D.fea;schedule(r.page)}syncSliders()};
+$('all').onclick=()=>{rs.forEach(r=>{r.str=D.str;r.fea=D.fea});pages.forEach((_,i)=>schedule(i));toast('Pengaturan diterapkan ke semua area.')};
+function removeSel(){const r=cur();if(!r)return;rs=rs.filter(x=>x!==r);sel=null;renderRegions();schedule(r.page)}
+$('del').onclick=removeSel;
+$('clr').onclick=()=>{const ps=new Set(rs.map(r=>r.page));rs=[];sel=null;renderRegions();ps.forEach(schedule)};
+
+/* ---------- Interaksi: gambar, geser, ubah ukuran ---------- */
+$('view').addEventListener('pointerdown',e=>{
+  const ov=e.target.closest('.ov');if(!ov)return;
+  const pi=pages.findIndex(p=>p.ov===ov),rect=ov.getBoundingClientRect(),fx=clamp((e.clientX-rect.left)/rect.width),fy=clamp((e.clientY-rect.top)/rect.height);
+  const el=e.target.closest('.rg'),h=e.target.dataset.h;
+  if(el){const r=rs.find(x=>x.id==el.dataset.id);if(sel!==r.id)select(r.id);drag=h?{r,mode:'size',h}:{r,mode:'move',fx,fy,o:{...r}}}
+  else{const r={id:++uid,page:pi,x0:fx,y0:fy,x1:fx,y1:fy,str:D.str,fea:D.fea};rs.push(r);sel=r.id;renderRegions();drag={r,mode:'size',h:'se',fresh:1}}
+  drag.rect=rect;e.preventDefault();
+});
+addEventListener('pointermove',e=>{
+  if(!drag)return;const{r,rect}=drag,fx=clamp((e.clientX-rect.left)/rect.width),fy=clamp((e.clientY-rect.top)/rect.height);
+  if(drag.mode==='move'){const o=drag.o,w=Math.abs(o.x1-o.x0),h=Math.abs(o.y1-o.y0),
+    nx=Math.min(1-w,Math.max(0,Math.min(o.x0,o.x1)+fx-drag.fx)),ny=Math.min(1-h,Math.max(0,Math.min(o.y0,o.y1)+fy-drag.fy));
+    r.x0=nx;r.x1=nx+w;r.y0=ny;r.y1=ny+h}
+  else{const h=drag.h;if(h.includes('w'))r.x0=fx;if(h.includes('e'))r.x1=fx;if(h.includes('n'))r.y0=fy;if(h.includes('s'))r.y1=fy}
+  const el=document.querySelector(`.rg[data-id="${r.id}"]`);if(el)styleEl(el,r);schedule(r.page);
+});
+addEventListener('pointerup',()=>{
+  if(!drag)return;const{r}=drag;drag=null;
+  if(r.x0>r.x1)[r.x0,r.x1]=[r.x1,r.x0];if(r.y0>r.y1)[r.y0,r.y1]=[r.y1,r.y0];
+  const p=pages[r.page].ov.getBoundingClientRect();
+  if((r.x1-r.x0)*p.width<8||(r.y1-r.y0)*p.height<8){rs=rs.filter(x=>x!==r);sel=null}
+  renderRegions();schedule(r.page);
+});
+addEventListener('keydown',e=>{
+  if(e.key==='Delete'||e.key==='Backspace'){removeSel();e.preventDefault()}
+  if(e.key==='Escape'&&sel){sel=null;renderRegions()}
+});
+
+/* ---------- Simpan ---------- */
+async function save(){
+  if(!rs.length)return toast('Belum ada area blur untuk disimpan.',1);
+  const b=$('save');b.disabled=true;
+  try{
+    const{PDFDocument}=PDFLib,src=await PDFDocument.load(bytes),out=await PDFDocument.create(),hit=new Set(rs.map(r=>r.page));
+    for(let i=0;i<pages.length;i++){
+      b.textContent=`Memproses halaman ${i+1}/${pages.length}…`;
+      if(hit.has(i)){
+        const p=await pdf.getPage(i+1),v1=p.getViewport({scale:1}),vp=p.getViewport({scale:EXPS}),c=mk(Math.round(vp.width),Math.round(vp.height));
+        await p.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+        applyBlur(c,rs.filter(r=>r.page===i),EXPS);
+        const img=await out.embedJpg(c.toDataURL('image/jpeg',.92)),pg=out.addPage([v1.width,v1.height]);
+        pg.drawImage(img,{x:0,y:0,width:v1.width,height:v1.height});
+      }else{const[cp]=await out.copyPages(src,[i]);out.addPage(cp)}
+    }
+    const data=await out.save(),a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([data],{type:'application/pdf'}));a.download=fileName+'_blur.pdf';
+    document.body.append(a);a.click();a.remove();toast('PDF tersimpan: '+a.download);
+  }catch(err){toast('Gagal menyimpan: '+err.message,1)}
+  b.disabled=false;b.textContent='Simpan PDF blur';
+}
+
+/* ---------- Pemasangan ---------- */
+let tt;function toast(t,err){const m=$('toast');m.textContent=t;m.className='glass show'+(err?' err':'');clearTimeout(tt);tt=setTimeout(()=>m.classList.remove('show'),4200)}
+$('pick').onclick=$('empty').onclick=()=>$('file').click();
+$('file').onchange=e=>{loadPDF(e.target.files[0]);e.target.value=''};
+$('save').onclick=save;$('zi').onclick=()=>setZoom(zoomW+120);$('zo').onclick=()=>setZoom(zoomW-120);
+['dragover','dragenter'].forEach(ev=>$('view').addEventListener(ev,e=>{e.preventDefault();$('empty')?.classList.add('drag')}));
+['dragleave','drop'].forEach(ev=>$('view').addEventListener(ev,e=>{e.preventDefault();$('empty')?.classList.remove('drag')}));
+$('view').addEventListener('drop',e=>loadPDF(e.dataTransfer.files[0]));
+syncSliders();
+<\/script>
+</body>
+</html></script>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const dec=id=>document.getElementById(id).textContent.replace(/<\\\/script/g,'</script').replace(/<\\!--/g,'<!--');
-const NAMES={home:'Home',cert:'Sertifikat',stamp:'Stamper'},loaded={};
+const NAMES={home:'Home',cert:'Sertifikat',stamp:'Stamper',blur:'Blur Teks'},loaded={};
 function ind(){const b=$('#nav button.on'),i=$('#ind');i.style.left=b.offsetLeft+'px';i.style.width=b.offsetWidth+'px'}
 function go(v,push=true){
   if(!NAMES[v])v='home';
@@ -724,7 +1020,7 @@ function go(v,push=true){
   $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
   ind();document.title='J-Expert Tools · '+NAMES[v];
   if(push&&location.hash!=='#'+v)history.pushState(null,'','#'+v);
-  if((v==='cert'||v==='stamp')&&!loaded[v]){
+  if((v==='cert'||v==='stamp'||v==='blur')&&!loaded[v]){
     loaded[v]=1;const p=$('#'+v),f=document.createElement('iframe');
     f.title=NAMES[v];f.onload=()=>p.classList.add('ready');
     requestAnimationFrame(()=>{f.srcdoc=dec('src-'+v);p.append(f)});
